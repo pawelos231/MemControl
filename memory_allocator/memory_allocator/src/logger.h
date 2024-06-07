@@ -15,7 +15,7 @@ public:
 	};
 
 	// Get the singleton instance of Logger
-	static std::shared_ptr<Logger>& instance();
+	static std::shared_ptr<Logger> get_instance();
 
 	// Delete copy constructor and assignment operator to prevent copies
 	Logger(Logger const&) = delete;
@@ -46,5 +46,6 @@ private:
 
 	// Helper method to get string representation of log level
 	std::string level_to_string(LOG_LEVEL level) const;
+	void log_message(const std::string& message);
 
 };
