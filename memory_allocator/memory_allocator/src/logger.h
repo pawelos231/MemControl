@@ -11,7 +11,7 @@ public:
 	enum class LOG_LEVEL {
 		INFO,
 		WARNING,
-		ERROR
+		ERR
 	};
 
 	// Get the singleton instance of Logger
@@ -38,6 +38,7 @@ public:
 
 
 private:
+	//private Logger constructor to not be able to create it later in the app
 	Logger();
 
 	std::ofstream out_file; //output file where logs will be stored

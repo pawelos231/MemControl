@@ -1,16 +1,11 @@
 #include "logger.h"
 
-Logger::Logger() {
-
-}
-
+Logger::Logger() {}
 
 std::shared_ptr<Logger> Logger::get_instance() {
-	//std::make_shared is more efficient then using straight up the 'new' keyword
-	//when used seperetaly, so something like that: static std::shared_ptr<Logger> logger{ new Logger };
-	//the allocation of the control block (which contains reference count and other metadata) and the object itself
-	//are allocated seperately std::make_shared combines those allocations, it boosts perfomance and can increase cache locality
-	static auto logger = std::make_shared<Logger>();
+	//std::make_shared, wont work here beacuse logger constructor is private
+	//normally it is best to use make_shared beacuse it reduces the allocations of control block and object itself are combined
+	static std::shared_ptr<Logger> logger{ new Logger };
 	return logger;
 }
 
@@ -36,7 +31,7 @@ std::string Logger::level_to_string(LOG_LEVEL level) const {
 	switch (level) {
 	case LOG_LEVEL::INFO:    return "INFO";
 	case LOG_LEVEL::WARNING: return "WARNING";
-	case LOG_LEVEL::ERROR:   return "ERROR";
+	case LOG_LEVEL::ERR:   return "ERROR";
 	default:				 return "UNKNOWN";
 	}
 }
@@ -50,7 +45,7 @@ void Logger::warning(const std::string& message) {
 }
 
 void Logger::error(const std::string& message) {
-	this->log(LOG_LEVEL::ERROR, message);
+	this->log(LOG_LEVEL::ERR, message);
 }
 
 

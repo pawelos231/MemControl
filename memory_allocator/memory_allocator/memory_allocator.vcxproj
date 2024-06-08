@@ -130,6 +130,7 @@
     <ClCompile Include="src\allocator.cpp" />
     <ClCompile Include="src\logger.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\mmap_windows.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\allocator.h" />

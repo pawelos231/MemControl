@@ -1,8 +1,21 @@
 #pragma once
+#include <iostream>
+
+struct heap {
+	struct heap_chunk* start; //pointer to the start of the heap
+	struct heap_chunk* end; //pointer to the end of the heap
+};
+
+struct heap_chunk {
+	int size; //gives us info about how big the chunk is
+	bool in_use; //is the chunk currently in use
+	struct heap_chunk* next; //pointer to the next chunk
+};
+
 
 class Allocator {
 public:
-	Allocator(void* memoryPool, size_t pool_size);
+	Allocator(size_t pool_size); //pool_size -> how to big to make the 'pool' of space
 
 	void allocate();
 	void free();
