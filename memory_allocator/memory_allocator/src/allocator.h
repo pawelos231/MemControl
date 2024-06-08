@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 
+//this will use double linked list, to make it easier to manage the heap
 struct heap {
 	struct heap_chunk* start; //pointer to the start of the heap
 	struct heap_chunk* end; //pointer to the end of the heap
