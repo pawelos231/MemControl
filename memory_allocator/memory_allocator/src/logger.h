@@ -47,6 +47,8 @@ private:
 
 	// Helper method to get string representation of log level
 	std::string level_to_string(LOG_LEVEL level) const;
+
+	//helper method to log to the standard output and the file
 	void log_message(const std::string& message);
 
 };

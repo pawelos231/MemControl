@@ -31,7 +31,7 @@ std::string Logger::level_to_string(LOG_LEVEL level) const {
 	switch (level) {
 	case LOG_LEVEL::INFO:    return "INFO";
 	case LOG_LEVEL::WARNING: return "WARNING";
-	case LOG_LEVEL::ERR:   return "ERROR";
+	case LOG_LEVEL::ERR:     return "ERROR";
 	default:				 return "UNKNOWN";
 	}
 }
