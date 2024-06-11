@@ -1,6 +1,25 @@
 #include "logger.h"
 
-Logger::Logger() {}
+Logger::Logger(): current_logger_prefix("./logs") {
+	struct stat info;
+
+	// Check if the directory exists
+	if (stat(this->get_current_logger_prefix(), &info) != 0) {
+		// Directory does not exist, create it
+		if (_mkdir(this->get_current_logger_prefix()) == 0) {
+			std::cout << "Logs folder created successfully.\n";
+		}
+		else {
+			std::cerr << "Failed to create logs folder.\n";
+		}
+	}
+	else if (info.st_mode & S_IFDIR) {
+		std::cout << "Logs folder already exists.\n";
+	}
+	else {
+		std::cerr << "Path exists but is not a directory.\n";
+	}
+}
 
 std::shared_ptr<Logger> Logger::get_instance() {
 	//std::make_shared, wont work here beacuse logger constructor is private
@@ -57,8 +76,18 @@ void Logger::set_output_file(const std::string& filename) {
 		out_file.close();
 	}
 	//open file with provided filename
-	this->out_file.open(filename, std::ios::out);
+	std::string file_path = std::string(this->get_current_logger_prefix()) + '/' + filename;
+
+	this->out_file.open(file_path, std::ios::out);
 	if (!this->out_file) {
 		throw std::runtime_error("Logger: Unable to open file " + filename);
 	}
+}
+
+const char* Logger::get_current_logger_prefix() {
+	return this->current_logger_prefix;
+}
+
+void Logger::set_current_logger_prefix(const char* prefix) {
+	this->current_logger_prefix = prefix;
 }

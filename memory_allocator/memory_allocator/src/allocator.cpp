@@ -10,7 +10,7 @@
 Allocator::Allocator(size_t pool_size, bool allow_fragmentation): allow_fragmentation(allow_fragmentation) {
     //setup logger
     this->logger = Logger::get_instance();
-    this->logger->set_output_file("logs/allocator_logger.txt");
+    this->logger->set_output_file("allocator_logger.txt");
 
     //give memory from kernel, mmap is basically a system call where you ask a kernel for more memory
     //the only catch is, it is native to unix based systems, which windows is not, that is why there is a mmap_windows.h
