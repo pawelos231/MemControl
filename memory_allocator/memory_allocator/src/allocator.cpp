@@ -1,5 +1,10 @@
 #include "allocator.h"
-#include "mmap_windows.h"
+
+#if defined(_WIN32) || defined(_WIN64)
+#include "mmap_windows.h" // own mmap implementation for windows systems
+#else
+#include <sys/mman.h> // For mmap on Unix-like systems
+#endif
 
 
 Allocator::Allocator(size_t pool_size, bool allow_fragmentation): allow_fragmentation(allow_fragmentation) {
@@ -104,8 +109,8 @@ void Allocator::free(void* block) {
         // Get the chunk associated with this pointer
         heap_chunk* chunk = reinterpret_cast<heap_chunk*>(reinterpret_cast<char*>(block) - 24); //to get access to the chunk we must substract metadata, beacuse then we will be at the metadata position and would be able to work from there
         if (!chunk->in_use) {
-            this->logger->log(Logger::LOG_LEVEL::WARNING, "Allocator::free: Double free detected");
-            throw std::runtime_error("Allocator::free: Double free detected");
+            this->logger->log(Logger::LOG_LEVEL::ERR, "Allocator::free: Double free detected");
+            return;
         }
 
         chunk->in_use = false;
