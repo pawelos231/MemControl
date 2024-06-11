@@ -134,6 +134,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\allocator.h" />
+    <ClInclude Include="src\allocator_list.h" />
     <ClInclude Include="src\double_linked_list.h" />
     <ClInclude Include="src\logger.h" />
   </ItemGroup>

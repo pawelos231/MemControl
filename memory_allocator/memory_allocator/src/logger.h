@@ -42,7 +42,7 @@ private:
 	Logger();
 
 	std::ofstream out_file; //output file where logs will be stored
-	LOG_LEVEL current_log_level;
+	LOG_LEVEL current_log_level; //current log level, info, warning or error
 	std::mutex log_mutex; // mutex to lock ability to read and write to the file
 
 	// Helper method to get string representation of log level

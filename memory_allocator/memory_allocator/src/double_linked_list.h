@@ -2,11 +2,11 @@
 #include <iostream>
 
 // Constant for invalid index error message
-const char* INVALID_INDEX = "Index out of range";
+//const char* INVALID_INDEX = "Index out of range";
 
 template <typename T>
 class DoublyLinkedList {
-private:
+protected:
     // Node class to represent each element in the list
     class Node {
     public:
@@ -23,6 +23,7 @@ private:
     int len;    // Length of the list
 
 public:
+
     // Constructor to initialize an empty list
     DoublyLinkedList() : head(nullptr), tail(nullptr), len(0) {}
 
@@ -51,7 +52,7 @@ public:
     // Function to remove the last element of the list
     void pop() {
         if (this->tail == nullptr) {
-            throw std::out_of_range(INVALID_INDEX); // Throw an exception if the list is empty
+            throw std::out_of_range("Index out of range"); // Throw an exception if the list is empty
         }
 
         Node* temp = this->tail; // Temporary pointer to the current tail
@@ -71,7 +72,7 @@ public:
     // Function to remove the first element of the list
     void shift() {
         if (this->head == nullptr) {
-            throw std::out_of_range(INVALID_INDEX); // Throw an exception if the list is empty
+            throw std::out_of_range("Index out of range"); // Throw an exception if the list is empty
         }
 
         Node* temp = this->head; // Temporary pointer to the current head
@@ -109,7 +110,7 @@ public:
     // Function to insert an element at a given index
     void insert(int index, T data) {
         if (index < 0 || index > len) {
-            throw std::out_of_range(INVALID_INDEX); // Throw an exception if the index is out of range
+            throw std::out_of_range("Index out of range"); // Throw an exception if the index is out of range
         }
 
         if (index == len) {
@@ -142,14 +143,14 @@ public:
     // Function to remove an element at a given index
     void remove(int index) {
         if (index < 0 || index >= len) {
-            throw std::out_of_range(INVALID_INDEX); // Throw an exception if the index is out of range
+            throw std::out_of_range("Index out of range"); // Throw an exception if the index is out of range
         }
 
         Node* temp = head;
 
         if (index == 0) {
-            head = head->next;
-            if (head != nullptr) {
+            this->head = this->head->next;
+            if (this->head != nullptr) {
                 head->prev = nullptr;
             }
             else {
@@ -157,9 +158,9 @@ public:
             }
         }
         else if (index == len - 1) {
-            temp = tail;
-            tail = tail->prev;
-            tail->next = nullptr;
+            temp = this->tail;
+            this->tail = this->tail->prev;
+            this->tail->next = nullptr;
         }
         else {
             for (int i = 0; i < index; i++) {
@@ -173,10 +174,18 @@ public:
         len--; // Decrement the length of the list
     }
 
+    auto get_head() {
+        return this->head;
+    }
+
+    auto get_tail () {
+        return this->tail;
+    }
+
     // Function to print the list
-    void print() {
+    virtual void print() {
         std::cout << "[";
-        Node* temp = head;
+        Node* temp = this->head;
         while (temp != nullptr) {
             std::cout << temp->data;
             if (temp->next != nullptr) {
