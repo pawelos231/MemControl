@@ -61,15 +61,15 @@ public:
         // Traverse the list to find the best fit chunk
         while (node != nullptr) {
             heap_chunk* chunk = node->data;
+
             if (!chunk->in_use && chunk->size >= total_size) {
-                if (best_fit == nullptr || chunk->size <= best_fit->size) {
-                    if (best_fit != nullptr && chunk->size - best_fit->size < best_dif && chunk->size - best_fit->size > 0) {
-                        best_dif = chunk->size - best_fit->size;
-                        best_fit = chunk;
-                    }
-                    else {
-                        best_fit = chunk;
-                    }
+                bool is_better_fit = (best_fit == nullptr) ||
+                    (chunk->size < best_fit->size) ||
+                    (chunk->size - best_fit->size < best_dif && chunk->size - best_fit->size > 0);
+
+                if (is_better_fit) {
+                    best_fit = chunk;
+                    best_dif = chunk->size - total_size;
                 }
             }
             node = node->next;
