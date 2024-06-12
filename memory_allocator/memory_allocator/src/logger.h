@@ -61,5 +61,4 @@ private:
 	//helper method to log to the standard output and the file
 	void log_message(const std::string& message);
 
-
 };

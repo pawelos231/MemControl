@@ -61,5 +61,5 @@ private:
 	// Merges adjacent blocks of free chunks to reduce fragmentation and consolidate free space.
 	// The underlying doubly linked list structure allows searching for adjacent chunks from both the head and the tail.
 	// This operation has a complexity of O(n), where n is the number of free chunks.
-	void mergeBlocks();
+	void merge_blocks();
 };

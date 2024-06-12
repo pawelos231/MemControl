@@ -15,7 +15,7 @@ public:
         std::cout << "[";
         Node* temp = this->head;
         while (temp != nullptr) {
-            std::cout << "Pointer to data: " << temp->data << " in use: " << (temp->data->in_use ? "TRUE" : "FALSE") << " total_size:" << temp->data->size;
+            std::cout << "Pointer to chunk: " << temp->data << " in use: " << (temp->data->in_use ? "TRUE" : "FALSE") << " total_size:" << temp->data->size;
             if (temp->next != nullptr) {
                 std::cout << ", " << "\n";
             }
@@ -51,10 +51,11 @@ public:
         std::cerr << "Error: Chunk not found in the list" << std::endl;
     }
 
+    //O(n) to find the best fitted chunk for memory that user requested
     heap_chunk* find_best_fit(size_t size) {
         auto node = this->get_head();
         heap_chunk* best_fit = nullptr;
-        size_t total_size = size + sizeof(heap_chunk);
+        size_t total_size = size + sizeof(*node);
         int best_dif = total_size;
 
         // Traverse the list to find the best fit chunk

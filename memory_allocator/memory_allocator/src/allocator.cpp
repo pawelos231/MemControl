@@ -16,6 +16,7 @@ Allocator::Allocator(size_t pool_size, bool allow_fragmentation): allow_fragment
     //the only catch is, it is native to unix based systems, which windows is not, that is why there is a mmap_windows.h
     //which provides mmap implementation for windows, probably will have to do something with it later (?)
     void* start = mmap(NULL, pool_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    std::cout << "START: " << start << std::endl;
 
     //we check if the mmap failed with this, beacuse: #define MAP_FAILED ((void *) -1)
     if (start == (void*)-1) {
@@ -45,7 +46,7 @@ void* Allocator::allocate(size_t size) {
     // Check if the requested size is greater than the available size
     if (size > this->heap_info.available) {
         this->logger->log(Logger::LOG_LEVEL::ERR, "Allocator::allocate: the size you provided is bigger than the available size");
-        throw (void*)-1;
+        return (void*)-1;
     }
 
     // Get the head chunk (under node->data)
@@ -77,7 +78,7 @@ void* Allocator::allocate(size_t size) {
                 this->heap_info.free_list.push(new_chunk);
             }
             else {
-                this->heap_info.free_list.unshift(new_chunk);
+                  this->heap_info.free_list.unshift(new_chunk);
             }
         }
 
@@ -105,30 +106,37 @@ void Allocator::free(void* block) {
         if (block == nullptr) {
             return;
         }
+        auto head = this->heap_info.free_list.get_head();
 
         // Get the chunk associated with this pointer
-        heap_chunk* chunk = reinterpret_cast<heap_chunk*>(reinterpret_cast<char*>(block) - 24); //to get access to the chunk we must substract metadata, beacuse then we will be at the metadata position and would be able to work from there
+        heap_chunk* chunk = reinterpret_cast<heap_chunk*>(reinterpret_cast<char*>(block) - sizeof(*head)); //to get access to the chunk we must substract metadata, beacuse then we will be at the metadata position and would be able to work from there
         if (!chunk->in_use) {
             this->logger->log(Logger::LOG_LEVEL::ERR, "Allocator::free: Double free detected");
             return;
         }
 
         chunk->in_use = false;
-        this->heap_info.available += chunk->size + sizeof(heap_chunk);
+        this->heap_info.available += chunk->size + sizeof(*head);
 
-        // Add the chunk back to the free list
-        this->heap_info.free_list.unshift(chunk);
+        // Add the chunk back to the free list at the appropiate position to keep the data in correct order
+        int idx = 0;
+        auto traverse_node = this->heap_info.free_list.get_head();
+        while(chunk > traverse_node->data) {
+            traverse_node = traverse_node->next;
+            idx++;
+        }
+        this->heap_info.free_list.insert(idx, chunk);
 
         // Merge adjacent free chunks to reduce fragmentation
         if (!this->allow_fragmentation) {
-            this->mergeBlocks();
+            this->merge_blocks();
         }
 
         this->heap_info.free_list.print();
     
 }
 
-void Allocator::mergeBlocks() {
+void Allocator::merge_blocks() {
     //get the head and traverse forwards
     auto node = this->heap_info.free_list.get_head();
     while (node != nullptr) {
@@ -139,6 +147,7 @@ void Allocator::mergeBlocks() {
             heap_chunk* current_chunk = node->data;
             heap_chunk* next_chunk = next->data;
             void* current_end = reinterpret_cast<void*>(reinterpret_cast<char*>(current_chunk) + current_chunk->size);
+
             if (current_end == reinterpret_cast<void*>(next_chunk)) {
                 // Merge the two chunks
                 current_chunk->size += next_chunk->size;

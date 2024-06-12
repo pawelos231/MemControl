@@ -4,3 +4,4 @@ memory_allocator/x64/
 memory_allocator/memory_allocator/.vs/
 memory_allocator/memory_allocator/x64/
 memory_allocator/memory_allocator/Debug
+memory_allocator/memory_allocator/logs
