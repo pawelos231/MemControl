@@ -5,11 +5,10 @@
 1. [Preliminary Assumptions](#preliminary-assumptions)
 2. [Project Description](#project-description)
 3. [Used Libraries](#used-libraries)
-4. [Test Results](#test-results)
-5. [User Instructions](#user-instructions)
-6. [Interesting Facts](#interesting-facts)
-7. [Expansion Possibilities](#expansion-possibilities)
-8. [Summary and Conclusions](#summary-and-conclusions)
+4. [User Instructions](#user-instructions)
+5. [Interesting Facts](#interesting-facts)
+6. [Expansion Possibilities](#expansion-possibilities)
+7. [Summary and Conclusions](#summary-and-conclusions)
 
 ## Preliminary Assumptions
 
@@ -29,12 +28,6 @@ The project involves implementing a dynamic memory allocator in C++. The allocat
 - **C++**: Main programming language used for implementing the program.
 - **Standard C++ Library (STL)**: Used for handling data structures and helper functions.
 - **System Libraries**: Used for gathering system information, such as `sys/types.h`, `sys/sysinfo.h`, `unistd.h`.
-
-## Test Results
-
-### Description
-
-The following images and descriptions show the basic assumptions and results of our project. The allocator ensures that consecutive data allocations are placed next to each other to avoid unused memory.
 
 ## User Instructions
 
