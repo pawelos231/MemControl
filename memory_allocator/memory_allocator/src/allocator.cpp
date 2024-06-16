@@ -126,8 +126,6 @@ void Allocator::free(void* block) {
             return;
         }
 
-        chunk->in_use = false;
-        this->heap_info.available += chunk->size + sizeof(*head);
 
         try {
             // Add the chunk back to the free list at the appropiate position to keep the data in correct order
@@ -143,6 +141,9 @@ void Allocator::free(void* block) {
             if (!this->allow_fragmentation) {
                 this->merge_blocks();
             }
+
+            chunk->in_use = false;
+            this->heap_info.available += chunk->size + sizeof(*head);
 
             this->heap_info.free_list.print();
         }

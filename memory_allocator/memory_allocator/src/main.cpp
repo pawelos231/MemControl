@@ -5,8 +5,8 @@
 
 int main(void) {
 	try {
-		//Allocator allocator_defragmentation_off(4096, true); //defragmentation off simply means no merging of chunks
-		Allocator allocator_defragmentation_on(4096, false);
+		Allocator allocator_defragmentation_off(4096, true); //defragmentation off simply means no merging of chunks
+		//Allocator allocator_defragmentation_on(4096, false);
 
 		//BASIC ALLOCATION EXAMPLE
 		/*
