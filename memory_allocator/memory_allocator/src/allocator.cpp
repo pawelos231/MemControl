@@ -16,7 +16,6 @@ Allocator::Allocator(size_t pool_size, bool allow_fragmentation): allow_fragment
     //the only catch is, it is native to unix based systems, which windows is not, that is why there is a mmap_windows.h
     //which provides mmap implementation for windows, probably will have to do something with it later (?)
     void* start = mmap(NULL, pool_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    std::cout << "START: " << start << std::endl;
 
     //we check if the mmap failed with this, beacuse: #define MAP_FAILED ((void *) -1)
     if (start == (void*)-1) {
@@ -24,6 +23,7 @@ Allocator::Allocator(size_t pool_size, bool allow_fragmentation): allow_fragment
         throw std::runtime_error("Allocator: mmap error ");
     }
 
+    std::cout << "START: " << start << std::endl;
 
     // first we create the initial region, this is the "wilderness" chunk
     // the heap starts as just one big chunk of allocatable memory, minus the metadata size 
@@ -31,7 +31,7 @@ Allocator::Allocator(size_t pool_size, bool allow_fragmentation): allow_fragment
     this->heap_info.free_list.push(init_region);
 
     init_region->in_use = false;
-    init_region->size = pool_size - sizeof(*this->heap_info.free_list.get_head()); //we take into account also all the metadata so prev (pointer), next (pointer), and heap_chunk data (in_use and size)
+    init_region->size = int(pool_size) - sizeof(*this->heap_info.free_list.get_head()); //we take into account also all the metadata so prev (pointer), next (pointer), and heap_chunk data (in_use and size)
 
     // Add the wilderness chunk to the heap linked list
     this->heap_info.available = init_region->size;
@@ -46,66 +46,77 @@ void* Allocator::allocate(size_t size) {
     // Check if the requested size is greater than the available size
     if (size > this->heap_info.available) {
         this->logger->log(Logger::LOG_LEVEL::ERR, "Allocator::allocate: the size you provided is bigger than the available size");
-        return (void*)-1;
+        return nullptr;
+    }
+    
+    try {
+        // Get the head chunk (under node->data)
+        auto head = this->heap_info.free_list.get_head();
+
+        // Find the best fit chunk for the requested size
+        auto chunk = this->heap_info.free_list.find_best_fit(size);
+
+        // Check if the chunk is not in use and has enough space to accommodate the requested size plus metadata
+        if (chunk && !chunk->in_use && chunk->size >= size + sizeof(*head)) {
+            // Allocate from this chunk
+            if (chunk->size == size + sizeof(*head)) {
+                // Exact fit, remove the chunk from the free list
+                this->heap_info.free_list.remove_chunk(chunk);
+            }
+            else if (chunk->size > size + sizeof(*head)) {
+                // Split the chunk if it's larger than needed
+                heap_chunk* new_chunk = reinterpret_cast<heap_chunk*>(reinterpret_cast<char*>(chunk) + sizeof(*head) + size);
+                new_chunk->size = chunk->size - (int(size) + sizeof(*head));
+                new_chunk->in_use = false;
+
+                chunk->size = int(size) + sizeof(*head);
+
+                // Remove the original chunk from the free list
+                this->heap_info.free_list.remove_chunk(chunk);
+
+                // Add the new chunk to the free list
+                if (this->heap_info.free_list.length() == 0) {
+                    this->heap_info.free_list.push(new_chunk);
+                }
+                else {
+                    this->heap_info.free_list.unshift(new_chunk);
+                }
+            }
+
+            // Mark the chunk as in use
+            chunk->in_use = true;
+
+            // Update the available size in the heap info
+            this->heap_info.available -= (size + sizeof(*head));
+
+            // Print the free list for debugging
+            this->heap_info.free_list.print();
+
+            // Return a pointer to the allocated memory, offset by the metadata size
+            //std::cout << chunk << " " << sizeof(*head) << " " << reinterpret_cast<void*>(reinterpret_cast<char*>(chunk) + 24) << std::endl;
+            return reinterpret_cast<void*>(reinterpret_cast<char*>(chunk) + sizeof(*head));
+        }
+
+        // If no suitable chunk was found, throw error and return nullptr
+        throw std::runtime_error("No suitable chunk found");
+    
+    } catch (const std::exception& e) {
+        this->logger->log(Logger::LOG_LEVEL::ERR, std::string("Allocator::allocate: Exception occurred: ") + e.what());
+    } catch (...) {
+        this->logger->log(Logger::LOG_LEVEL::ERR, "Allocator::allocate: An unknown error occurred");
     }
 
-    // Get the head chunk (under node->data)
-    auto head = this->heap_info.free_list.get_head();
-
-    // Find the best fit chunk for the requested size
-    auto chunk = this->heap_info.free_list.find_best_fit(size);
-
-    // Check if the chunk is not in use and has enough space to accommodate the requested size plus metadata
-    if (chunk && !chunk->in_use && chunk->size >= size + sizeof(*head)) {
-        // Allocate from this chunk
-        if (chunk->size == size + sizeof(*head)) {
-            // Exact fit, remove the chunk from the free list
-            this->heap_info.free_list.remove_chunk(chunk);
-        }
-        else if (chunk->size > size + sizeof(*head)) {
-            // Split the chunk if it's larger than needed
-            heap_chunk* new_chunk = reinterpret_cast<heap_chunk*>(reinterpret_cast<char*>(chunk) + sizeof(*head) + size);
-            new_chunk->size = chunk->size - (size + sizeof(*head));
-            new_chunk->in_use = false;
-
-            chunk->size = size + sizeof(*head);
-
-            // Remove the original chunk from the free list
-            this->heap_info.free_list.remove_chunk(chunk);
-
-            // Add the new chunk to the free list
-            if (this->heap_info.free_list.length() == 0) {
-                this->heap_info.free_list.push(new_chunk);
-            }
-            else {
-                  this->heap_info.free_list.unshift(new_chunk);
-            }
-        }
-
-        // Mark the chunk as in use
-        chunk->in_use = true;
-
-        // Update the available size in the heap info
-        this->heap_info.available -= (size + sizeof(*head));
-
-        // Print the free list for debugging
-        this->heap_info.free_list.print();
-
-        // Return a pointer to the allocated memory, offset by the metadata size
-        //std::cout << chunk << " " << sizeof(*head) << " " << reinterpret_cast<void*>(reinterpret_cast<char*>(chunk) + 24) << std::endl;
-        return reinterpret_cast<void*>(reinterpret_cast<char*>(chunk) + sizeof(*head));
-    }
-
-    // If no suitable chunk was found, log an error and return nullptr
-    this->logger->log(Logger::LOG_LEVEL::ERR, "Allocator::allocate: No suitable chunk found");
-    return (void*)-1;
+    return nullptr;
+    
 }
 
 
 void Allocator::free(void* block) {
         if (block == nullptr) {
+            this->logger->log(Logger::LOG_LEVEL::ERR, "Allocator::free: You cannot pass nullptr as the value");
             return;
-        }
+        };
+
         auto head = this->heap_info.free_list.get_head();
 
         // Get the chunk associated with this pointer
@@ -118,22 +129,29 @@ void Allocator::free(void* block) {
         chunk->in_use = false;
         this->heap_info.available += chunk->size + sizeof(*head);
 
-        // Add the chunk back to the free list at the appropiate position to keep the data in correct order
-        int idx = 0;
-        auto traverse_node = this->heap_info.free_list.get_head();
-        while(chunk > traverse_node->data) {
-            traverse_node = traverse_node->next;
-            idx++;
-        }
-        this->heap_info.free_list.insert(idx, chunk);
+        try {
+            // Add the chunk back to the free list at the appropiate position to keep the data in correct order
+            int idx = 0;
+            auto traverse_node = this->heap_info.free_list.get_head();
+            while (chunk > traverse_node->data) {
+                traverse_node = traverse_node->next;
+                idx++;
+            }
+            this->heap_info.free_list.insert(idx, chunk);
 
-        // Merge adjacent free chunks to reduce fragmentation
-        if (!this->allow_fragmentation) {
-            this->merge_blocks();
-        }
+            // Merge adjacent free chunks to reduce fragmentation
+            if (!this->allow_fragmentation) {
+                this->merge_blocks();
+            }
 
-        this->heap_info.free_list.print();
-    
+            this->heap_info.free_list.print();
+        }
+        catch (const std::exception& e) {
+            this->logger->log(Logger::LOG_LEVEL::ERR, std::string("Allocator::free: Exception occurred: ") + e.what());
+        }
+        catch (...) {
+            this->logger->log(Logger::LOG_LEVEL::ERR, "Allocator::free: An unknown error occurred");
+        }   
 }
 
 void Allocator::merge_blocks() {
@@ -193,20 +211,20 @@ void Allocator::merge_blocks() {
 };
 
 
-void Allocator::printSize() {
-    size_t totalSize = getTotalSize();
-    size_t freeSize = getFreeSize();
+void Allocator::print_size() {
+    size_t totalSize = this->get_total_size();
+    size_t freeSize = this->get_free_size();
 
-    logger->info("Total size: " + std::to_string(totalSize) + " bytes");
-    logger->info("Free size: " + std::to_string(freeSize) + " bytes");
+    this->logger->info("Total size: " + std::to_string(totalSize) + " bytes");
+    this->logger->info("Free size: " + std::to_string(freeSize) + " bytes");
 
     std::cout << "Total size: " << totalSize << " bytes\n";
     std::cout << "Free size: " << freeSize << " bytes\n";
 }
 
-size_t const Allocator::getTotalSize() {
+size_t const Allocator::get_total_size() {
     size_t totalSize = 0;
-    auto current = heap_info.free_list.get_head();
+    auto current = this->heap_info.free_list.get_head();
     while (current != nullptr) {
         totalSize += current->data->size + sizeof(heap_chunk);
         current = current->next;
@@ -214,9 +232,9 @@ size_t const Allocator::getTotalSize() {
     return totalSize;
 }
 
-size_t const Allocator::getFreeSize() {
+size_t const Allocator::get_free_size() {
     size_t freeSize = 0;
-    auto current_node = heap_info.free_list.get_head();
+    auto current_node = this->heap_info.free_list.get_head();
     while (current_node != nullptr) {
         if (!current_node->data->in_use) {
             freeSize += current_node->data->size;

@@ -1,23 +1,23 @@
 #include "logger.h"
 
-Logger::Logger(): current_logger_prefix("./logs") {
+Logger::Logger() : current_logger_prefix("./logs") {
 	struct stat info;
 
 	// Check if the directory exists
 	if (stat(this->get_current_logger_prefix(), &info) != 0) {
 		// Directory does not exist, create it
-		if (_mkdir(this->get_current_logger_prefix()) == 0) {
-			std::cout << "Logs folder created successfully.\n";
+		if (_mkdir(this->get_current_logger_prefix()) != 0) {
+			throw std::runtime_error("Failed to create logs folder.");
 		}
 		else {
-			std::cerr << "Failed to create logs folder.\n";
+			std::cout << "Logs folder created successfully.\n";
 		}
 	}
 	else if (info.st_mode & S_IFDIR) {
-		std::cout << "Logs folder already exists.\n";
+		// Directory exists, do nothing
 	}
 	else {
-		std::cerr << "Path exists but is not a directory.\n";
+		throw std::runtime_error("Path exists but is not a directory.");
 	}
 }
 

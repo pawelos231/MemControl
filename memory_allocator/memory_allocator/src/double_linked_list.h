@@ -27,6 +27,10 @@ public:
     // Constructor to initialize an empty list
     DoublyLinkedList() : head(nullptr), tail(nullptr), len(0) {}
 
+    ~DoublyLinkedList() {
+        this->clear(); // Ensure all nodes are deleted
+    }
+
     // Function to get the current length of the list
     const int length() const {
         return len;
@@ -52,7 +56,7 @@ public:
     // Function to remove the last element of the list
     void pop() {
         if (this->tail == nullptr) {
-            throw std::out_of_range("Index out of range"); // Throw an exception if the list is empty
+            throw std::out_of_range("DoublyLinkedList::pop: Index out of range"); // Throw an exception if the list is empty
         }
 
         Node* temp = this->tail; // Temporary pointer to the current tail
@@ -110,7 +114,7 @@ public:
     // Function to insert an element at a given index
     void insert(int index, T data) {
         if (index < 0 || index > len) {
-            throw std::out_of_range("Index out of range"); // Throw an exception if the index is out of range
+            throw std::out_of_range("DoublyLinkedList::insert: Index out of range"); // Throw an exception if the index is out of range
         }
 
         if (index == len) {
@@ -143,7 +147,7 @@ public:
     // Function to remove an element at a given index
     void remove(int index) {
         if (index < 0 || index >= len) {
-            throw std::out_of_range("Index out of range"); // Throw an exception if the index is out of range
+            throw std::out_of_range("DoublyLinkedList::remove: Index out of range"); // Throw an exception if the index is out of range
         }
 
         Node* temp = head;
@@ -178,7 +182,7 @@ public:
         return this->head;
     }
 
-    auto get_tail () {
+    auto get_tail() {
         return this->tail;
     }
 
@@ -194,5 +198,15 @@ public:
             temp = temp->next;
         }
         std::cout << "]" << std::endl;
+    }
+
+    void clear() {
+        while (this->head != nullptr) {
+            Node* temp = head;
+            this->head = this->head->next;
+            delete temp;
+        }
+        this->tail = nullptr;
+        this->len = 0;
     }
 };

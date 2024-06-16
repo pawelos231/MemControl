@@ -26,24 +26,24 @@ Allocator(size_t pool_size, bool allow_fragmentation);
 // - A pointer to the allocated memory block, or nullptr if the allocation fails.
 void* allocate(size_t size);
 
-// Deallocates a previously allocated block of memory.
+// Deallocates a previously allocated block of memory. 
 // Parameters:
 // - block: A pointer to the memory block to be deallocated.
 void free(void* block);
 
 // Prints the current total and free sizes of the heap.
 // Useful for debugging and monitoring the memory usage.
-void printSize();
+void print_size();
 
 // Returns the total size of the memory managed by the allocator, including both used and free memory.
 // Returns:
 // - The total size of the heap in bytes.
-size_t const getTotalSize();
+size_t const get_total_size();
 
 // Returns the total free size available in the heap for allocation.
 // Returns:
 // - The free size of the heap in bytes.
-size_t const getFreeSize();
+size_t const get_free_size();
 
 private:
 	// A boolean flag to control the behavior of fragmentation in the allocator.

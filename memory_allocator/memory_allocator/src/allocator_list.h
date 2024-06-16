@@ -11,7 +11,7 @@ struct heap_chunk {
 class AllocatorList : public DoublyLinkedList<heap_chunk*> {
 public:
     //overrided print function to include additional info
-	virtual void print() override { 
+    virtual void print() override {
         std::cout << "[";
         Node* temp = this->head;
         while (temp != nullptr) {
@@ -22,7 +22,7 @@ public:
             temp = temp->next;
         }
         std::cout << "]" << "\n" << std::endl;
-	}
+    }
 
     void remove_chunk(heap_chunk* chunk) {
         Node* temp = this->head;
@@ -48,7 +48,7 @@ public:
             }
             temp = temp->next;
         }
-        std::cerr << "Error: Chunk not found in the list" << std::endl;
+        throw std::runtime_error("Chunk not found in the list");
     }
 
     //O(n) to find the best fitted chunk for memory that user requested
@@ -75,8 +75,11 @@ public:
             node = node->next;
         }
 
+        if (best_fit == nullptr) {
+            throw std::runtime_error("AllocatorList::find_best_fit: Could not find best_fit");
+        } 
+
         return best_fit;
-        
     }
 
 };
