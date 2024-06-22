@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 
-// Constant for invalid index error message
+//Constant for invalid index error message
 //const char* INVALID_INDEX = "Index out of range";
 
 template <typename T>

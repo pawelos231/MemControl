@@ -56,7 +56,7 @@ public:
         auto node = this->get_head();
         heap_chunk* best_fit = nullptr;
         size_t total_size = size + sizeof(*node);
-        int best_dif = total_size;
+        int best_dif = int(total_size);
 
         // Traverse the list to find the best fit chunk
         while (node != nullptr) {
@@ -69,7 +69,7 @@ public:
 
                 if (is_better_fit) {
                     best_fit = chunk;
-                    best_dif = chunk->size - total_size;
+                    best_dif = chunk->size - int(total_size);
                 }
             }
             node = node->next;

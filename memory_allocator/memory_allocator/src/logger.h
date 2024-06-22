@@ -49,6 +49,7 @@ public:
 private:
 	//private Logger constructor to not be able to create it later in the app
 	Logger();
+	~Logger();
 
 	std::ofstream out_file; //output file where logs will be stored
 	LOG_LEVEL current_log_level; //current log level, info, warning or error

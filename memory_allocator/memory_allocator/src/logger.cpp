@@ -21,10 +21,16 @@ Logger::Logger() : current_logger_prefix("./logs") {
 	}
 }
 
+Logger::~Logger() {
+	if (out_file.is_open()) {
+		out_file.close();
+	}
+}
+
 std::shared_ptr<Logger> Logger::get_instance() {
 	//std::make_shared, wont work here beacuse logger constructor is private
 	//normally it is best to use make_shared beacuse it reduces the allocations of control block and object itself are combined
-	static std::shared_ptr<Logger> logger{ new Logger };
+	static std::shared_ptr<Logger> logger(new Logger(), [](Logger* p) { delete p; });
 	return logger;
 }
 

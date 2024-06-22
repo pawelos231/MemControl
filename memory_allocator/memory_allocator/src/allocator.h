@@ -7,7 +7,7 @@
 // - available: The current amount of available memory in bytes.
 // - free_list: A doubly linked list of pointers to free chunks of memory.
 struct heap_info {
-	struct AllocatorList free_list;
+	class AllocatorList free_list;
 	size_t available;
 };
 
